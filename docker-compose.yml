@@ -10,6 +10,12 @@ services:
       - uploads:/app/uploads
     environment:
       - NODE_ENV=production
+    networks:
+      - easypanel
 
 volumes:
   uploads:
+
+networks:
+  easypanel:
+    external: true
