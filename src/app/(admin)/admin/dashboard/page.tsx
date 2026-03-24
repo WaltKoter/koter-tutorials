@@ -23,12 +23,12 @@ export default function DashboardPage() {
         router.push("/admin/login");
         return;
       }
-      if (!res.ok) throw new Error("Failed to fetch spaces");
+      if (!res.ok) throw new Error("Falha ao carregar espaços");
       const data = await res.json();
       setSpaces(data);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to load spaces"
+        err instanceof Error ? err.message : "Falha ao carregar espaços"
       );
     } finally {
       setLoading(false);
@@ -43,12 +43,12 @@ export default function DashboardPage() {
   async function handleDelete(id: string) {
     try {
       const res = await fetch(`/api/spaces/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete space");
-      toast.success("Space deleted");
+      if (!res.ok) throw new Error("Falha ao excluir espaço");
+      toast.success("Espaço excluído");
       fetchSpaces();
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to delete space"
+        err instanceof Error ? err.message : "Falha ao excluir espaço"
       );
     }
   }
@@ -60,15 +60,15 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-              Spaces
+              Espaços
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-              Manage your tutorial spaces
+              Gerencie seus espaços de tutoriais
             </p>
           </div>
           <Button onClick={() => setCreateOpen(true)} size="sm">
             <Plus className="h-4 w-4 mr-1.5" />
-            Create Space
+            Criar Espaço
           </Button>
         </div>
 
@@ -84,11 +84,11 @@ export default function DashboardPage() {
         ) : spaces.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-zinc-500 dark:text-zinc-400 mb-4">
-              No spaces yet. Create your first one to get started.
+              Nenhum espaço ainda. Crie o primeiro para começar.
             </p>
             <Button onClick={() => setCreateOpen(true)} variant="outline">
               <Plus className="h-4 w-4 mr-1.5" />
-              Create Space
+              Criar Espaço
             </Button>
           </div>
         ) : (

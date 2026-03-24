@@ -47,17 +47,17 @@ export function CreateSpaceDialog({
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to create space");
+        throw new Error(data.error || "Falha ao criar espaço");
       }
 
-      toast.success("Space created");
+      toast.success("Espaço criado");
       setName("");
       setDescription("");
       onOpenChange(false);
       onCreated();
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to create space"
+        err instanceof Error ? err.message : "Falha ao criar espaço"
       );
     } finally {
       setLoading(false);
@@ -68,17 +68,17 @@ export function CreateSpaceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Space</DialogTitle>
+          <DialogTitle>Criar Espaço</DialogTitle>
           <DialogDescription>
-            A space is a collection of tutorial pages, like a documentation site.
+            Um espaço é uma coleção de páginas de tutorial, como um site de documentação.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="space-name">Name</Label>
+            <Label htmlFor="space-name">Nome</Label>
             <Input
               id="space-name"
-              placeholder="My Tutorial"
+              placeholder="Meu Tutorial"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -86,10 +86,10 @@ export function CreateSpaceDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="space-desc">Description</Label>
+            <Label htmlFor="space-desc">Descrição</Label>
             <Textarea
               id="space-desc"
-              placeholder="A brief description of this space..."
+              placeholder="Uma breve descrição deste espaço..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -101,10 +101,10 @@ export function CreateSpaceDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={loading || !name.trim()}>
-              {loading ? "Creating..." : "Create"}
+              {loading ? "Criando..." : "Criar"}
             </Button>
           </DialogFooter>
         </form>

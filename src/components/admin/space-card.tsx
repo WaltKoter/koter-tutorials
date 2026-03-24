@@ -39,7 +39,7 @@ export function SpaceCard({ space, onDelete }: SpaceCardProps) {
               {space.name}
             </CardTitle>
             <CardDescription className="mt-1 line-clamp-2 text-sm">
-              {space.description || "No description"}
+              {space.description || "Sem descrição"}
             </CardDescription>
           </div>
           <DropdownMenu>
@@ -57,7 +57,7 @@ export function SpaceCard({ space, onDelete }: SpaceCardProps) {
                 }}
               >
                 <Pencil className="h-4 w-4 mr-2" />
-                Edit
+                Editar
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={(e) => {
@@ -67,7 +67,7 @@ export function SpaceCard({ space, onDelete }: SpaceCardProps) {
                 className="text-red-600 focus:text-red-600"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+                Excluir
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -78,7 +78,7 @@ export function SpaceCard({ space, onDelete }: SpaceCardProps) {
           <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
             <FileText className="h-3.5 w-3.5" />
             <span>
-              {space._count.pages} {space._count.pages === 1 ? "page" : "pages"}
+              {space._count.pages} {space._count.pages === 1 ? "página" : "páginas"}
             </span>
           </div>
           <Badge
@@ -89,7 +89,7 @@ export function SpaceCard({ space, onDelete }: SpaceCardProps) {
                 : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100"
             }
           >
-            {space.published ? "Published" : "Draft"}
+            {space.published ? "Publicado" : "Rascunho"}
           </Badge>
         </div>
       </CardContent>

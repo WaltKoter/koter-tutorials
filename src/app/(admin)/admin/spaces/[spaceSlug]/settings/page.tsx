@@ -31,13 +31,15 @@ export default function SpaceSettingsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/spaces/by-slug/${params.spaceSlug}`);
-        if (!res.ok) throw new Error("Failed to load space");
-        const data = await res.json();
+        const res = await fetch(`/api/spaces`);
+        if (!res.ok) throw new Error("Falha ao carregar espaço");
+        const spaces = await res.json();
+        const data = spaces.find((s: any) => s.slug === params.spaceSlug);
+        if (!data) throw new Error("Espaço não encontrado");
         setSpace(data);
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : "Failed to load space"
+          err instanceof Error ? err.message : "Falha ao carregar espaço"
         );
       } finally {
         setLoading(false);
@@ -67,17 +69,17 @@ export default function SpaceSettingsPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to save");
+        throw new Error(data.error || "Falha ao salvar");
       }
 
       const updated = await res.json();
-      toast.success("Settings saved");
+      toast.success("Configurações salvas");
 
       if (updated.slug !== params.spaceSlug) {
         router.replace(`/admin/spaces/${updated.slug}/settings`);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save");
+      toast.error(err instanceof Error ? err.message : "Falha ao salvar");
     } finally {
       setSaving(false);
     }
@@ -87,18 +89,18 @@ export default function SpaceSettingsPage() {
     if (!space) return;
     if (
       !confirm(
-        "Are you sure you want to delete this space? This action cannot be undone."
+        "Tem certeza que deseja excluir este espaço? Esta ação não pode ser desfeita."
       )
     )
       return;
 
     try {
       const res = await fetch(`/api/spaces/${space.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
-      toast.success("Space deleted");
+      if (!res.ok) throw new Error("Falha ao excluir");
+      toast.success("Espaço excluído");
       router.push("/admin/dashboard");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+      toast.error(err instanceof Error ? err.message : "Falha ao excluir");
     }
   }
 
@@ -113,7 +115,7 @@ export default function SpaceSettingsPage() {
   if (!space) {
     return (
       <div className="p-8">
-        <p className="text-zinc-500">Space not found</p>
+        <p className="text-zinc-500">Espaço não encontrado</p>
       </div>
     );
   }
@@ -122,7 +124,7 @@ export default function SpaceSettingsPage() {
     <div className="p-8 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-          Space Settings
+          Configurações do Espaço
         </h1>
         <a
           href={`/${space.slug}`}
@@ -131,13 +133,13 @@ export default function SpaceSettingsPage() {
           className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-sm font-medium hover:bg-muted transition-colors"
         >
           <ExternalLink className="h-4 w-4" />
-          View Public Site
+          Ver Site Público
         </a>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">Nome</Label>
           <Input
             id="name"
             value={space.name}
@@ -155,12 +157,12 @@ export default function SpaceSettingsPage() {
             required
           />
           <p className="text-xs text-zinc-500">
-            URL path: /{space.slug}
+            Caminho da URL: /{space.slug}
           </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">Descrição</Label>
           <Textarea
             id="description"
             value={space.description || ""}
@@ -173,7 +175,7 @@ export default function SpaceSettingsPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="primaryColor">Primary Color</Label>
+            <Label htmlFor="primaryColor">Cor Primária</Label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
@@ -194,7 +196,7 @@ export default function SpaceSettingsPage() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="accentColor">Accent Color</Label>
+            <Label htmlFor="accentColor">Cor de Destaque</Label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
@@ -219,10 +221,10 @@ export default function SpaceSettingsPage() {
         <div className="flex items-center justify-between rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
           <div>
             <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-              Published
+              Publicado
             </p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Make this space publicly accessible
+              Tornar este espaço acessível publicamente
             </p>
           </div>
           <Switch
@@ -234,7 +236,7 @@ export default function SpaceSettingsPage() {
         </div>
 
         <Button type="submit" disabled={saving}>
-          {saving ? "Saving..." : "Save Changes"}
+          {saving ? "Salvando..." : "Salvar Alterações"}
         </Button>
       </form>
 
@@ -242,14 +244,14 @@ export default function SpaceSettingsPage() {
 
       <div className="rounded-lg border border-red-200 dark:border-red-900/50 p-4">
         <h3 className="text-sm font-medium text-red-600 dark:text-red-400 mb-1">
-          Danger Zone
+          Zona de Perigo
         </h3>
         <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3">
-          Permanently delete this space and all its pages.
+          Excluir permanentemente este espaço e todas as suas páginas.
         </p>
         <Button variant="destructive" size="sm" onClick={handleDelete}>
           <Trash2 className="h-4 w-4 mr-1.5" />
-          Delete Space
+          Excluir Espaço
         </Button>
       </div>
     </div>

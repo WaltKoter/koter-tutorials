@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { FlatPage } from "@/lib/tree";
+import { usePages } from "@/contexts/pages-context";
 
 interface CreatePageDialogProps {
   open: boolean;
@@ -29,7 +29,6 @@ interface CreatePageDialogProps {
   spaceId: string;
   spaceSlug: string;
   parentId: string | null;
-  pages: FlatPage[];
 }
 
 export function CreatePageDialog({
@@ -38,9 +37,9 @@ export function CreatePageDialog({
   spaceId,
   spaceSlug,
   parentId,
-  pages,
 }: CreatePageDialogProps) {
   const router = useRouter();
+  const { pages, addPage } = usePages();
   const [title, setTitle] = useState("");
   const [selectedParentId, setSelectedParentId] = useState<string>(
     parentId || "__none__"
@@ -74,18 +73,26 @@ export function CreatePageDialog({
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to create page");
+        throw new Error(data.error || "Falha ao criar página");
       }
 
       const page = await res.json();
-      toast.success("Page created");
+      toast.success("Página criada");
+      addPage({
+        id: page.id,
+        title: page.title,
+        slug: page.slug,
+        icon: page.icon,
+        parentId: page.parentId,
+        order: page.order,
+        status: page.status,
+      });
       setTitle("");
       onOpenChange(false);
-      router.refresh();
       router.push(`/admin/spaces/${spaceSlug}/pages/${page.id}`);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to create page"
+        err instanceof Error ? err.message : "Falha ao criar página"
       );
     } finally {
       setLoading(false);
@@ -96,17 +103,17 @@ export function CreatePageDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>New Page</DialogTitle>
+          <DialogTitle>Nova Página</DialogTitle>
           <DialogDescription>
-            Create a new page in this space.
+            Crie uma nova página neste espaço.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="page-title">Title</Label>
+            <Label htmlFor="page-title">Título</Label>
             <Input
               id="page-title"
-              placeholder="Getting Started"
+              placeholder="Introdução"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -115,17 +122,17 @@ export function CreatePageDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="page-parent">Parent Page</Label>
+            <Label htmlFor="page-parent">Página Pai</Label>
             <Select
               value={selectedParentId}
               onValueChange={(v) => setSelectedParentId(v ?? "")}
             >
               <SelectTrigger>
-                <SelectValue placeholder="No parent (top level)" />
+                <SelectValue placeholder="Sem página pai (nível raiz)" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">
-                  No parent (top level)
+                  Sem página pai (nível raiz)
                 </SelectItem>
                 {pages.map((page) => (
                   <SelectItem key={page.id} value={page.id}>
@@ -142,10 +149,10 @@ export function CreatePageDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={loading || !title.trim()}>
-              {loading ? "Creating..." : "Create"}
+              {loading ? "Criando..." : "Criar"}
             </Button>
           </DialogFooter>
         </form>

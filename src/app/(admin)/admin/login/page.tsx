@@ -34,13 +34,13 @@ export default function LoginPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Login failed");
+        throw new Error(data.error || "Falha no login");
       }
 
-      toast.success("Logged in successfully");
+      toast.success("Login realizado com sucesso");
       router.push("/admin/dashboard");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Login failed");
+      toast.error(err instanceof Error ? err.message : "Falha no login");
     } finally {
       setLoading(false);
     }
@@ -56,17 +56,17 @@ export default function LoginPage() {
               Koter Tutorials
             </span>
           </div>
-          <CardTitle className="text-lg font-medium">Welcome back</CardTitle>
-          <CardDescription>Sign in to the admin panel</CardDescription>
+          <CardTitle className="text-lg font-medium">Bem-vindo de volta</CardTitle>
+          <CardDescription>Acesse o painel administrativo</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-mail</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="admin@exemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -74,18 +74,18 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Senha</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Digite sua senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
         </CardContent>

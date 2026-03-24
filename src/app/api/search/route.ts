@@ -16,10 +16,20 @@ export async function GET(request: NextRequest) {
   const pages = await prisma.page.findMany({
     where: {
       status: "PUBLISHED",
-      title: {
-        contains: q,
-        mode: "insensitive",
-      },
+      OR: [
+        {
+          title: {
+            contains: q,
+            mode: "insensitive",
+          },
+        },
+        {
+          searchText: {
+            contains: q,
+            mode: "insensitive",
+          },
+        },
+      ],
       ...(spaceId ? { spaceId } : {}),
     },
     select: {

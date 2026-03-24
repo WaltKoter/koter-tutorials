@@ -11,10 +11,10 @@ export function AdminHeader() {
   async function handleLogout() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      toast.success("Logged out");
+      toast.success("Logout realizado");
       router.push("/admin/login");
     } catch {
-      toast.error("Logout failed");
+      toast.error("Falha ao sair");
     }
   }
 
@@ -35,7 +35,7 @@ export function AdminHeader() {
             className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
           >
             <LogOut className="h-4 w-4 mr-1.5" />
-            Logout
+            Sair
           </Button>
         </div>
       </div>

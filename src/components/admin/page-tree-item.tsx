@@ -14,6 +14,7 @@ import {
   EyeOff,
   ArrowUp,
   ArrowDown,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +24,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { TreeNode, FlatPage } from "@/lib/tree";
+import type { TreeNode } from "@/lib/tree";
+import { usePages } from "@/contexts/pages-context";
 
 interface PageTreeItemProps {
   node: TreeNode;
@@ -31,7 +33,6 @@ interface PageTreeItemProps {
   spaceId: string;
   depth: number;
   onCreateChild: (parentId: string | null) => void;
-  allPages: FlatPage[];
 }
 
 export function PageTreeItem({
@@ -40,17 +41,17 @@ export function PageTreeItem({
   spaceId,
   depth,
   onCreateChild,
-  allPages,
 }: PageTreeItemProps) {
   const router = useRouter();
   const params = useParams<{ pageId?: string }>();
   const [expanded, setExpanded] = useState(true);
+  const { pages, updatePage, removePage, refreshPages, addPage } = usePages();
 
   const isActive = params.pageId === node.id;
   const hasChildren = node.children.length > 0;
 
   async function handleDelete() {
-    if (!confirm(`Delete "${node.title}"? This will also delete all child pages.`))
+    if (!confirm(`Excluir "${node.title}"? Isso também excluirá todas as subpáginas.`))
       return;
 
     try {
@@ -58,12 +59,12 @@ export function PageTreeItem({
         `/api/spaces/${spaceId}/pages/${node.id}`,
         { method: "DELETE" }
       );
-      if (!res.ok) throw new Error("Failed to delete page");
-      toast.success("Page deleted");
-      router.refresh();
+      if (!res.ok) throw new Error("Falha ao excluir página");
+      toast.success("Página excluída");
+      removePage(node.id);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to delete page"
+        err instanceof Error ? err.message : "Falha ao excluir página"
       );
     }
   }
@@ -79,18 +80,18 @@ export function PageTreeItem({
           body: JSON.stringify({ status: newStatus }),
         }
       );
-      if (!res.ok) throw new Error("Failed to update status");
-      toast.success(`Page set to ${newStatus.toLowerCase()}`);
-      router.refresh();
+      if (!res.ok) throw new Error("Falha ao atualizar status");
+      toast.success(`Página definida como ${newStatus === "DRAFT" ? "rascunho" : "publicada"}`);
+      updatePage(node.id, { status: newStatus });
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to update status"
+        err instanceof Error ? err.message : "Falha ao atualizar status"
       );
     }
   }
 
   async function handleMove(direction: "up" | "down") {
-    const siblings = allPages.filter((p) => p.parentId === node.parentId);
+    const siblings = pages.filter((p) => p.parentId === node.parentId);
     siblings.sort((a, b) => a.order - b.order);
     const currentIndex = siblings.findIndex((p) => p.id === node.id);
 
@@ -111,9 +112,34 @@ export function PageTreeItem({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ order: node.order }),
       });
-      router.refresh();
+      await refreshPages(spaceId);
     } catch {
-      toast.error("Failed to reorder");
+      toast.error("Falha ao reordenar");
+    }
+  }
+
+  async function handleDuplicate() {
+    try {
+      const res = await fetch(
+        `/api/spaces/${spaceId}/pages/${node.id}/duplicate`,
+        { method: "POST" }
+      );
+      if (!res.ok) throw new Error("Falha ao duplicar página");
+      const duplicated = await res.json();
+      toast.success("Página duplicada");
+      addPage({
+        id: duplicated.id,
+        title: duplicated.title,
+        slug: duplicated.slug,
+        icon: duplicated.icon,
+        parentId: duplicated.parentId,
+        order: duplicated.order,
+        status: duplicated.status,
+      });
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Falha ao duplicar página"
+      );
     }
   }
 
@@ -157,7 +183,7 @@ export function PageTreeItem({
           <span className="truncate text-sm">{node.title}</span>
           {node.status === "DRAFT" && (
             <span className="text-[10px] text-amber-500 flex-shrink-0">
-              Draft
+              Rascunho
             </span>
           )}
         </div>
@@ -172,29 +198,33 @@ export function PageTreeItem({
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => onCreateChild(node.id)}>
               <Plus className="h-4 w-4 mr-2" />
-              Add child page
+              Adicionar subpágina
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleToggleStatus}>
               {node.status === "PUBLISHED" ? (
                 <>
                   <EyeOff className="h-4 w-4 mr-2" />
-                  Set as Draft
+                  Marcar como rascunho
                 </>
               ) : (
                 <>
                   <Eye className="h-4 w-4 mr-2" />
-                  Publish
+                  Publicar
                 </>
               )}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDuplicate}>
+              <Copy className="h-4 w-4 mr-2" />
+              Duplicar
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleMove("up")}>
               <ArrowUp className="h-4 w-4 mr-2" />
-              Move up
+              Mover para cima
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleMove("down")}>
               <ArrowDown className="h-4 w-4 mr-2" />
-              Move down
+              Mover para baixo
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -202,7 +232,7 @@ export function PageTreeItem({
               className="text-red-600 focus:text-red-600"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              Excluir
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -218,7 +248,6 @@ export function PageTreeItem({
               spaceId={spaceId}
               depth={depth + 1}
               onCreateChild={onCreateChild}
-              allPages={allPages}
             />
           ))}
         </div>

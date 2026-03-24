@@ -5,17 +5,18 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageTreeItem } from "@/components/admin/page-tree-item";
 import { CreatePageDialog } from "@/components/admin/create-page-dialog";
-import { buildTree, type FlatPage } from "@/lib/tree";
+import { buildTree } from "@/lib/tree";
+import { usePages } from "@/contexts/pages-context";
 
 interface PageTreeProps {
-  pages: FlatPage[];
   spaceSlug: string;
   spaceId: string;
 }
 
-export function PageTree({ pages, spaceSlug, spaceId }: PageTreeProps) {
+export function PageTree({ spaceSlug, spaceId }: PageTreeProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [parentId, setParentId] = useState<string | null>(null);
+  const { pages } = usePages();
 
   const tree = buildTree(pages);
 
@@ -34,7 +35,7 @@ export function PageTree({ pages, spaceSlug, spaceId }: PageTreeProps) {
           onClick={() => handleCreateChild(null)}
         >
           <Plus className="h-3.5 w-3.5 mr-1.5" />
-          New Page
+          Nova Página
         </Button>
       </div>
 
@@ -47,14 +48,13 @@ export function PageTree({ pages, spaceSlug, spaceId }: PageTreeProps) {
             spaceId={spaceId}
             depth={0}
             onCreateChild={handleCreateChild}
-            allPages={pages}
           />
         ))}
       </div>
 
       {tree.length === 0 && (
         <p className="px-4 py-6 text-xs text-center text-zinc-400 dark:text-zinc-500">
-          No pages yet
+          Nenhuma página ainda
         </p>
       )}
 
@@ -64,7 +64,6 @@ export function PageTree({ pages, spaceSlug, spaceId }: PageTreeProps) {
         spaceId={spaceId}
         spaceSlug={spaceSlug}
         parentId={parentId}
-        pages={pages}
       />
     </div>
   );

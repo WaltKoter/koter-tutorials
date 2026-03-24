@@ -35,8 +35,9 @@ model Page {
   children Page[]     @relation("PageTree")
   order    Int        @default(0)
   status   PageStatus @default(DRAFT)
-  icon     String?
-  spaceId  String
+  icon       String?
+  searchText String?
+  spaceId    String
   space    Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())

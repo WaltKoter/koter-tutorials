@@ -56,6 +56,18 @@ export async function PATCH(
       }
     }
 
+    // Extract searchText from content when content is updated
+    if ("content" in data && Array.isArray(data.content)) {
+      function extractText(nodes: any[]): string {
+        return nodes.map((node: any) => {
+          if (node.text) return node.text;
+          if (node.children) return extractText(node.children);
+          return "";
+        }).join(" ").trim();
+      }
+      updateData.searchText = extractText(data.content);
+    }
+
     const page = await prisma.page.update({
       where: { id: pageId, spaceId },
       data: updateData,
