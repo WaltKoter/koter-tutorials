@@ -1,5 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getIronSession } from "iron-session";
+import { cookies } from "next/headers";
+
+interface SessionData {
+  isLoggedIn: boolean;
+  email: string;
+}
+
+const sessionOptions = {
+  password: process.env.SESSION_SECRET || "fallback-secret-change-me-please-32",
+  cookieName: "koter-tutorials-session",
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "lax" as const,
+    maxAge: 60 * 60 * 24 * 7,
+  },
+};
 
 export async function POST(request: NextRequest) {
   let body;
@@ -32,16 +49,18 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const session = await getSession();
+    const cookieStore = await cookies();
+    const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
     session.isLoggedIn = true;
     session.email = email;
     await session.save();
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Session save error:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Session save error:", message, err);
     return NextResponse.json(
-      { error: "Failed to create session" },
+      { error: "Failed to create session", detail: message },
       { status: 500 }
     );
   }
