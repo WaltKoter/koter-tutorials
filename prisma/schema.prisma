@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Space {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  logoUrl      String?
+  primaryColor String   @default("#0f172a")
+  accentColor  String   @default("#3b82f6")
+  published    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  pages  Page[]
+  images Image[]
+
+  @@index([slug])
+}
+
+model Page {
+  id       String     @id @default(cuid())
+  title    String
+  slug     String
+  content  Json       @default("[]")
+  parentId String?
+  parent   Page?      @relation("PageTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Page[]     @relation("PageTree")
+  order    Int        @default(0)
+  status   PageStatus @default(DRAFT)
+  icon     String?
+  spaceId  String
+  space    Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([spaceId, slug])
+  @@index([spaceId, parentId, order])
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Image {
+  id           String  @id @default(cuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  spaceId      String?
+  space        Space?  @relation(fields: [spaceId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([spaceId])
+}

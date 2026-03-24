@@ -1,0 +1,15 @@
+services:
+  koter-tutorials:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3847:3847"
+    env_file:
+      - .env
+    volumes:
+      - uploads:/app/uploads
+    environment:
+      - NODE_ENV=production
+
+volumes:
+  uploads:
